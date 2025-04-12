@@ -1,48 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-char flags[] = {'c', 'l', 'm', 'w'};
+typedef struct flags {
+    int c;
+    int l;
+    int f;
+    int m;
+} flags;
 
-int isFlagValid(char flag) {
-    int flagPresent = 0;
-    int totalFlags = sizeof(flags);
+flags getFlags(char* userFlags[], int totalArgs) {
+    int opt;
+    flags flagOps = { 0, 0, 0, 0 };
 
-    // binary search to check for valid flags
-    int left = 0, right = totalFlags - 1;
-    while (left <= right) {
-        int mid = (left + right) / 2;
-        char validFlag = flags[mid];
-
-        if (validFlag == flag) {
-            flagPresent = 1;
-            break;
-        }
-
-        if (validFlag > flag) {
-            right = mid - 1;
-        } else {
-            left = mid + 1;
-        }
-    }
-
-    return flagPresent;
-}
-
-int areFlagsValid(char* flags[], int totalArgs) {
-    int flagsValid = 1;
-    
-    for (int i = 1; i < totalArgs; i++) {
-        if (flags[i][0] == '-') {
-            int validFlag = isFlagValid(flags[i][1]);
-
-            if (!validFlag) {
-                flagsValid = 0;
+    while ((opt = getopt(totalArgs, userFlags, "clwm")) != -1) {
+        switch (opt) {
+            case 'c':
+                flagOps.c = 1;
                 break;
-            }
+            case 'l':
+                flagOps.l = 1;
+                break;
+            case 'w':
+                flagOps.f = 1;
+                break;
+            case 'm':
+                flagOps.m = 1;
+                break;
+            default:
+                break;
         }
     }
 
-    return flagsValid;
+    return flagOps;
 }
 
 int main(int argc, char *argv[]) {
@@ -51,11 +41,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    int flagsValid = areFlagsValid(argv, argc);
-    if (!flagsValid) {
-        printf("please provide the valid flags.\nThe Valid flags are:\n-c, -l, -m, -w\n");
-        exit(1);
-    }
-
+    flags flagOps = getFlags(argv, argc);
     return 0;
 }
