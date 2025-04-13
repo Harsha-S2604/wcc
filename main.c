@@ -5,7 +5,7 @@
 typedef struct flags {
     int c;
     int l;
-    int f;
+    int w;
     int m;
 } flags;
 
@@ -22,7 +22,7 @@ flags getFlags(char* userFlags[], int totalArgs) {
                 flagOps.l = 1;
                 break;
             case 'w':
-                flagOps.f = 1;
+                flagOps.w = 1;
                 break;
             case 'm':
                 flagOps.m = 1;
