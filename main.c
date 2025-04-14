@@ -35,6 +35,22 @@ flags getFlags(char* userFlags[], int totalArgs) {
     return flagOps;
 }
 
+int getFileIdx (char* userFlags[], int totalArgs) {
+    int fileIdx = -1;
+
+    for (int i = 1; i < totalArgs; i++) {
+        char* userFlag = userFlags[i];
+        if (userFlag[0] == '-') {
+            continue;
+        } else {
+            fileIdx = i;
+            break;
+        }
+    }
+
+    return fileIdx;
+}
+
 int main(int argc, char *argv[]) {
     if (argc <= 1) {
         fprintf(stderr, "please provide the valid filename\n");
@@ -42,5 +58,12 @@ int main(int argc, char *argv[]) {
     }
 
     flags flagOps = getFlags(argv, argc);
+    int fileIdx = getFileIdx(argv, argc);
+
+    for (int argIdx = fileIdx; argIdx < argc; argIdx++) {
+        char* fileName = argv[argIdx];
+        printf("The filename is %s\n", fileName);
+    }
+
     return 0;
 }
