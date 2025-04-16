@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 typedef struct flags {
     int c;
@@ -170,6 +171,8 @@ int main(int argc, char *argv[]) {
 
         char character;
         int inWord = 0;
+        int totalCharacters = 0;
+
         while ((character = fgetc(fileStream)) != EOF) {
             if (flagOps.c) {
                 bytes[idx]++;
@@ -186,15 +189,27 @@ int main(int argc, char *argv[]) {
             }
 
             if (flagOps.w) {
-                if (!inWord && character != ' ') {
+                if (!inWord && !isspace(character) && character != '\n') {
                     inWord = 1;
                     words[idx]++;
-                } else if (character == ' ' || character == '\n') {
+                } else if (isspace(character) || character == '\n') {
+                    if (words[idx] > 6539) {
+                        printf("doc\n");
+                        putchar(character);
+                    }
                     inWord = 0;
                 }
             } else {
                 words = NULL;
             }
+
+            // if (flagOps.m) {
+            //     if (character != '\n') {
+            //         totalCharacters++;
+            //     }
+            // } else {
+
+            // }
         }
 
         fclose(fileStream);
