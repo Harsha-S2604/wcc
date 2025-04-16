@@ -99,20 +99,9 @@ void display(flags flagOps, int totalFiles) {
     unsigned long long int totalWords = 0;
     unsigned long long int i;
 
+    // display individual file
     for (i = 0; i < totalFiles; i++) {
         char* fileName = fileNames[i];
-        
-        if (flagOps.c) {
-            unsigned long long int byte = bytes[i];
-            totalBytes += byte;
-            fprintf(stdout, "%lld ", byte);
-        }
-
-        if (flagOps.l) {
-            unsigned long long int line = lines[i];
-            totalLines += line;
-            fprintf(stdout, "%lld ", line);
-        }
 
         if (flagOps.w) {
             unsigned long long int word = words[i];
@@ -120,10 +109,35 @@ void display(flags flagOps, int totalFiles) {
             fprintf(stdout, "%lld ", word);
         }
 
+        if (flagOps.l) {
+            unsigned long long int line = lines[i];
+            totalLines += line;
+            fprintf(stdout, "%lld ", line);
+        }
+        
+        if (flagOps.c) {
+            unsigned long long int byte = bytes[i];
+            totalBytes += byte;
+            fprintf(stdout, "%lld ", byte);
+        }
+
         fprintf(stdout, "%s\n", fileName);
     }
 
-    fprintf(stdout, "%lld %lld %lld %s\n", totalBytes, totalWords, totalLines, "total");
+    // display total values
+    if (flagOps.w) {
+        fprintf(stdout, "%lld ", totalWords);
+    }
+
+    if (flagOps.l) {
+        fprintf(stdout, "%lld ", totalLines);
+    }
+
+    if (flagOps.c) {
+        fprintf(stdout, "%lld ", totalBytes);
+    }
+
+    fprintf(stdout, "total\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -195,4 +209,4 @@ int main(int argc, char *argv[]) {
     free(fileNames);
 
     return 0;
-} 
+}  
