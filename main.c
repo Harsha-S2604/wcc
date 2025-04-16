@@ -15,6 +15,7 @@ int MAX_BYTES_STORAGE = 1024;
 unsigned long long int* bytes;
 unsigned long long int* lines;
 unsigned long long int* words;
+unsigned long long int* characters;
 char** fileNames;
 
 FILE* getFileStream(char* fileName) {
@@ -78,6 +79,10 @@ void allocateMemory(flags flagOps, int size) {
     if (flagOps.w) {
         words = (unsigned long long int*)realloc(words, size * sizeof(long long int));
     }
+
+    if (flagOps.m) {
+        characters = (unsigned long long int*)realloc(characters, size * sizeof(long long int));
+    }
 }
 
 void initDefaultValue(flags flagOps, int idx) {
@@ -92,12 +97,17 @@ void initDefaultValue(flags flagOps, int idx) {
     if (flagOps.w) {
         words[idx] = 0;
     }
+
+    if (flagOps.m) {
+        characters[idx] = 0;
+    }
 }
 
 void display(flags flagOps, int totalFiles) {
     unsigned long long int totalBytes = 0;
     unsigned long long int totalLines = 0;
     unsigned long long int totalWords = 0;
+    unsigned long long int totalChars = 0;
     unsigned long long int i;
 
     // display individual file
@@ -122,6 +132,12 @@ void display(flags flagOps, int totalFiles) {
             fprintf(stdout, "%lld ", byte);
         }
 
+        if (flagOps.m) {
+            unsigned long long int character = characters[i];
+            totalChars += character;
+            fprintf(stdout, "%lld ", character);
+        }
+
         fprintf(stdout, "%s\n", fileName);
     }
 
@@ -136,6 +152,10 @@ void display(flags flagOps, int totalFiles) {
 
     if (flagOps.c) {
         fprintf(stdout, "%lld ", totalBytes);
+    }
+
+    if (flagOps.m) {
+        fprintf(stdout, "%lld ", totalChars);
     }
 
     fprintf(stdout, "total\n");
@@ -171,8 +191,6 @@ int main(int argc, char *argv[]) {
 
         char character;
         int inWord = 0;
-        int totalCharacters = 0;
-
         while ((character = fgetc(fileStream)) != EOF) {
             if (flagOps.c) {
                 bytes[idx]++;
@@ -203,13 +221,11 @@ int main(int argc, char *argv[]) {
                 words = NULL;
             }
 
-            // if (flagOps.m) {
-            //     if (character != '\n') {
-            //         totalCharacters++;
-            //     }
-            // } else {
-
-            // }
+            if (flagOps.m) {
+                characters[idx]++;
+            } else {
+                characters = NULL;
+            }
         }
 
         fclose(fileStream);
@@ -221,6 +237,7 @@ int main(int argc, char *argv[]) {
     free(bytes);
     free(lines);
     free(words);
+    free(characters);
     free(fileNames);
 
     return 0;
