@@ -13,6 +13,7 @@ int MAX_BYTES_STORAGE = 1024;
 
 unsigned long long int* bytes;
 unsigned long long int* lines;
+unsigned long long int* words;
 char** fileNames;
 
 FILE* getFileStream(char* fileName) {
@@ -72,6 +73,10 @@ void allocateMemory(flags flagOps, int size) {
     if (flagOps.l) {
         lines = (unsigned long long int*)realloc(lines, size * sizeof(long long int));
     }
+
+    if (flagOps.w) {
+        words = (unsigned long long int*)realloc(words, size * sizeof(long long int));
+    }
 }
 
 void initDefaultValue(flags flagOps, int idx) {
@@ -82,11 +87,16 @@ void initDefaultValue(flags flagOps, int idx) {
     if (flagOps.l) {
         lines[idx] = 0;
     }
+
+    if (flagOps.w) {
+        words[idx] = 0;
+    }
 }
 
 void display(flags flagOps, int totalFiles) {
     unsigned long long int totalBytes = 0;
     unsigned long long int totalLines = 0;
+    unsigned long long int totalWords = 0;
     unsigned long long int i;
 
     for (i = 0; i < totalFiles; i++) {
@@ -104,10 +114,16 @@ void display(flags flagOps, int totalFiles) {
             fprintf(stdout, "%lld ", line);
         }
 
+        if (flagOps.w) {
+            unsigned long long int word = words[i];
+            totalWords += word;
+            fprintf(stdout, "%lld ", word);
+        }
+
         fprintf(stdout, "%s\n", fileName);
     }
 
-    fprintf(stdout, "%lld %lld %s\n", totalBytes, totalLines, "total");
+    fprintf(stdout, "%lld %lld %lld %s\n", totalBytes, totalWords, totalLines, "total");
 }
 
 int main(int argc, char *argv[]) {
@@ -124,6 +140,7 @@ int main(int argc, char *argv[]) {
     }
 
     for (int argIdx = fileIdx; argIdx < argc; argIdx++) {
+        int idx = argIdx - fileIdx;
         char* fileName = argv[argIdx];
 
         FILE* fileStream = getFileStream(fileName);
@@ -132,25 +149,37 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        allocateMemory(flagOps, (argIdx - fileIdx) + 1);
-        initDefaultValue(flagOps, argIdx - fileIdx);
+        allocateMemory(flagOps, idx + 1);
+        initDefaultValue(flagOps, idx);
 
-        fileNames[argIdx - fileIdx] = fileName;
+        fileNames[idx] = fileName;
 
         char character;
+        int inWord = 0;
         while ((character = fgetc(fileStream)) != EOF) {
             if (flagOps.c) {
-                bytes[argIdx - fileIdx]++;
+                bytes[idx]++;
             } else {
                 bytes = NULL;
             }
 
             if (flagOps.l) {
                 if (character == '\n') {
-                    lines[argIdx - fileIdx]++;
+                    lines[idx]++;
                 }
             } else {
                 lines = NULL;
+            }
+
+            if (flagOps.w) {
+                if (!inWord && character != ' ') {
+                    inWord = 1;
+                    words[idx]++;
+                } else if (character == ' ' || character == '\n') {
+                    inWord = 0;
+                }
+            } else {
+                words = NULL;
             }
         }
 
@@ -162,7 +191,8 @@ int main(int argc, char *argv[]) {
 
     free(bytes);
     free(lines);
+    free(words);
     free(fileNames);
 
     return 0;
-}
+} 
