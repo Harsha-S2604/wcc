@@ -103,6 +103,15 @@ void initDefaultValue(flags flagOps, int idx) {
     }
 }
 
+void validateFlagOps(flags* flagOps) {
+    if (!flagOps -> c && !flagOps -> m && !flagOps -> l && !flagOps -> w) {
+        flagOps -> c = 1;
+        flagOps -> m = 1;
+        flagOps -> w = 1;
+        flagOps -> l = 1;
+    }
+}
+
 void display(flags flagOps, int totalFiles) {
     unsigned long long int totalBytes = 0;
     unsigned long long int totalLines = 0;
@@ -117,25 +126,25 @@ void display(flags flagOps, int totalFiles) {
         if (flagOps.w) {
             unsigned long long int word = words[i];
             totalWords += word;
-            fprintf(stdout, "%lld ", word);
+            fprintf(stdout, "words-%lld ", word);
         }
 
         if (flagOps.l) {
             unsigned long long int line = lines[i];
             totalLines += line;
-            fprintf(stdout, "%lld ", line);
+            fprintf(stdout, "lines-%lld ", line);
         }
         
         if (flagOps.c) {
             unsigned long long int byte = bytes[i];
             totalBytes += byte;
-            fprintf(stdout, "%lld ", byte);
+            fprintf(stdout, "bytes-%lld ", byte);
         }
 
         if (flagOps.m) {
             unsigned long long int character = characters[i];
             totalChars += character;
-            fprintf(stdout, "%lld ", character);
+            fprintf(stdout, "characters-%lld ", character);
         }
 
         fprintf(stdout, "%s\n", fileName);
@@ -143,19 +152,19 @@ void display(flags flagOps, int totalFiles) {
 
     // display total values
     if (flagOps.w) {
-        fprintf(stdout, "%lld ", totalWords);
+        fprintf(stdout, "words-%lld ", totalWords);
     }
 
     if (flagOps.l) {
-        fprintf(stdout, "%lld ", totalLines);
+        fprintf(stdout, "lines-%lld ", totalLines);
     }
 
     if (flagOps.c) {
-        fprintf(stdout, "%lld ", totalBytes);
+        fprintf(stdout, "bytes-%lld ", totalBytes);
     }
 
     if (flagOps.m) {
-        fprintf(stdout, "%lld ", totalChars);
+        fprintf(stdout, "characters-%lld ", totalChars);
     }
 
     fprintf(stdout, "total\n");
@@ -176,6 +185,8 @@ int main(int argc, char *argv[]) {
     }
 
     flags flagOps = getFlags(argv, argc);
+    validateFlagOps(&flagOps);
+
     int fileIdx = getFileIdx(argv, argc);
     if (fileIdx == -1) {
         fprintf(stderr, "[ERROR]:: Please provide the valid filename\n");
@@ -223,10 +234,6 @@ int main(int argc, char *argv[]) {
                     inWord = 1;
                     words[idx]++;
                 } else if (isspace(character) || character == '\n') {
-                    if (words[idx] > 6539) {
-                        printf("doc\n");
-                        putchar(character);
-                    }
                     inWord = 0;
                 }
             } else {
