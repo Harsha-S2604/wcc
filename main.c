@@ -161,6 +161,14 @@ void display(flags flagOps, int totalFiles) {
     fprintf(stdout, "total\n");
 }
 
+int utf8_char_length(unsigned char c) {
+    if ((c & 0x80) == 0x00) return 1;           // 0xxxxxxx (ASCII)
+    else if ((c & 0xE0) == 0xC0) return 2;      // 110xxxxx
+    else if ((c & 0xF0) == 0xE0) return 3;      // 1110xxxx
+    else if ((c & 0xF8) == 0xF0) return 4;      // 11110xxx
+    else return -1;                             // Invalid first byte
+}
+
 int main(int argc, char *argv[]) {
     if (argc <= 1) {
         fprintf(stderr, "[ERROR]:: Please provide the valid filename\n");
@@ -191,6 +199,10 @@ int main(int argc, char *argv[]) {
 
         char character;
         int inWord = 0;
+
+        int inCluster = 0;
+        int clusterLen = 0;
+
         while ((character = fgetc(fileStream)) != EOF) {
             if (flagOps.c) {
                 bytes[idx]++;
@@ -222,7 +234,23 @@ int main(int argc, char *argv[]) {
             }
 
             if (flagOps.m) {
-                characters[idx]++;
+                // handling clusters: cluster is a sequence of characters that needs to be treated as a single
+                if (!inCluster) {
+                    clusterLen = utf8_char_length((unsigned char)character);
+                    if (clusterLen > 0) {
+                        inCluster = 1;
+                        characters[idx]++;
+                    }
+
+                }
+
+                if (inCluster) {
+                    clusterLen -= 1;
+                    if (clusterLen == 0) {
+                        inCluster = 0;
+                    }
+                }
+                
             } else {
                 characters = NULL;
             }
